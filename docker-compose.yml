@@ -1,0 +1,66 @@
+services:
+  # ----------------------------------------------------------------------------
+  # PostgreSQL 16 Database Service
+  # ----------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    container_name: civic_ai_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-civic_ai_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-civic_ai_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------------------------------------------
+  # FastAPI Application Backend Service
+  # ----------------------------------------------------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: civic_ai_backend
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=False
+      - PROJECT_NAME=AI-Powered Civic Service Assistant
+      - API_V1_STR=/api/v1
+      - SECRET_KEY=${SECRET_KEY:-civic_ai_assistant_production_secret_key_change_me}
+      - DATABASE_URL=postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-civic_ai_db}
+      - POSTGRES_SERVER=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-civic_ai_db}
+      - LLM_PROVIDER=${LLM_PROVIDER:-retrieval_only}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - GROQ_MODEL=${GROQ_MODEL:-llama3-70b-8192}
+      - VECTOR_STORE_TYPE=chroma
+      - VECTOR_STORE_PATH=data/vector_index
+      - KNOWLEDGE_BASE_PATH=data/knowledge_base
+      - STORAGE_PATH=data/storage
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    command: >
+      sh -c "alembic upgrade head &&
+             python scripts/create_admin.py &&
+             python scripts/ingest_knowledge_base.py &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+volumes:
+  postgres_data:
+    driver: local

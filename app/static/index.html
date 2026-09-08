@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicAI - AI-Powered Civic Service, Application & Grievance Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <style>
+    .hero-landing {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      color: #ffffff;
+      padding: 72px 24px;
+      text-align: center;
+      position: relative;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 600;
+      color: #93c5fd;
+      margin-bottom: 20px;
+    }
+    .hero-title {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      max-width: 800px;
+      margin: 0 auto 16px;
+      line-height: 1.2;
+    }
+    .hero-subtitle {
+      font-size: 17px;
+      color: #cbd5e1;
+      max-width: 640px;
+      margin: 0 auto 28px;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin: 48px 0;
+    }
+    .feature-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+      text-align: left;
+    }
+    .feature-icon {
+      font-size: 32px;
+      margin-bottom: 16px;
+      display: inline-block;
+    }
+    .navbar-public {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+  <!-- Disclaimer Banner -->
+  <div class="disclaimer-banner">
+    <span>⚠️</span>
+    <span><strong>Prototype Notice:</strong> This is a fictional civic-service assistant prototype and is not an official government portal.</span>
+  </div>
+
+  <!-- Public Top Navigation -->
+  <header class="navbar-public">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="font-size: 26px;">🏛️</span>
+      <span style="font-size: 18px; font-weight: 800; color: var(--primary);">CivicAI Portal</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <a href="/static/services.html" class="btn btn-outline btn-sm">Browse Services</a>
+      <a href="/static/chat.html" class="btn btn-outline btn-sm">💬 AI Assistant</a>
+      <a href="/static/login.html" class="btn btn-primary btn-sm">Sign In</a>
+      <a href="/static/register.html" class="btn btn-secondary btn-sm">Register</a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-landing">
+    <div class="hero-badge">
+      <span>🛡️</span> Grounded AI & Civic Automation
+    </div>
+    <h1 class="hero-title">Empowering Citizens with Grounded AI Services & Seamless Redressal</h1>
+    <p class="hero-subtitle">
+      Explore public service catalogues, verify eligibility criteria, track applications with reference IDs, and interact with our verified municipal AI assistant.
+    </p>
+    <div class="hero-actions">
+      <a href="/static/login.html" class="btn btn-primary btn-lg">Access Citizen Portal ➔</a>
+      <a href="/static/chat.html" class="btn btn-outline btn-lg" style="color: #ffffff; border-color: rgba(255, 255, 255, 0.4);">Ask Civic AI Assistant</a>
+      <a href="/docs" target="_blank" class="btn btn-outline btn-lg" style="color: #93c5fd; border-color: rgba(147, 197, 253, 0.4);">Swagger / API Docs</a>
+    </div>
+  </section>
+
+  <!-- Main Container -->
+  <main class="page-container" style="max-width: 1200px;">
+    <!-- Three Core Pillars -->
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">📋</span>
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Service Applications</h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">
+          Submit digital applications with automated reference tracking numbers (<code style="font-family: var(--font-mono); font-weight: 600;">APP-YYYYMMDD-XXXX</code>) and follow live officer scrutiny.
+        </p>
+        <a href="/static/services.html" class="btn btn-outline btn-sm">View Catalogue ➔</a>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">📢</span>
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Grievance Redressal</h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">
+          File municipal complaints directly with municipal departments and receive verified officer resolutions with timestamped status logs.
+        </p>
+        <a href="/static/login.html" class="btn btn-outline btn-sm">File Grievance ➔</a>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">🤖</span>
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Grounded RAG Assistant</h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">
+          Ask procedural and eligibility questions. All responses cite indexed municipal guidelines with strict anti-hallucination guardrails.
+        </p>
+        <a href="/static/chat.html" class="btn btn-outline btn-sm">Open Chat Assistant ➔</a>
+      </div>
+    </div>
+
+    <!-- Quick Identity Demo Strip -->
+    <div class="card" style="background: #f8fafc; text-align: center; padding: 28px;">
+      <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Quick-Access Classroom Demo Roles</h3>
+      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 18px;">
+        Use pre-configured demo credentials to evaluate the role-based workflows in seconds.
+      </p>
+      <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+        <a href="/static/login.html" class="btn btn-outline btn-sm" onclick="localStorage.setItem('quick_demo', 'citizen')">👤 Demo Citizen</a>
+        <a href="/static/login.html" class="btn btn-outline btn-sm" onclick="localStorage.setItem('quick_demo', 'officer')">👮 Department Officer</a>
+        <a href="/static/login.html" class="btn btn-outline btn-sm" onclick="localStorage.setItem('quick_demo', 'admin')">⚙️ System Admin</a>
+      </div>
+    </div>
+  </main>
+
+  <footer style="background: #ffffff; border-top: 1px solid var(--border-color); padding: 24px; text-align: center; font-size: 13px; color: var(--text-muted);">
+    <p>CivicAI Assistant • FastAPI, SQLAlchemy, Alembic, ChromaDB RAG & WebSockets • Group-F Capstone</p>
+  </footer>
+
+  <script src="/static/js/api.js"></script>
+</body>
+</html>

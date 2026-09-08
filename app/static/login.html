@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicAI - Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="/static/css/auth.css">
+</head>
+<body class="auth-page">
+  <div class="disclaimer-banner">
+    <span>⚠️</span>
+    <span><strong>Prototype Notice:</strong> Fictional Civic Portal Simulation. Do not enter real sensitive credentials.</span>
+  </div>
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <span class="auth-logo">🏛️</span>
+        <h1 class="auth-title">Civic Portal Sign In</h1>
+        <p class="auth-subtitle">AI-Powered Civic Service & Grievance Assistant</p>
+      </div>
+
+      <!-- Quick Fill Demo Roles -->
+      <div class="demo-accounts-box">
+        <div class="demo-accounts-title">
+          <span>⚡</span> 1-Click Classroom Demo Fill:
+        </div>
+        <div class="demo-pills-container">
+          <button type="button" class="demo-pill" onclick="fillDemoAccount('citizen')">
+            <span>👤</span> Citizen
+          </button>
+          <button type="button" class="demo-pill" onclick="fillDemoAccount('officer')">
+            <span>👮</span> Officer
+          </button>
+          <button type="button" class="demo-pill" onclick="fillDemoAccount('admin')">
+            <span>⚙️</span> Admin
+          </button>
+        </div>
+      </div>
+
+      <!-- Sign In Form -->
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address <span class="required">*</span></label>
+          <input type="email" id="email" class="form-control" placeholder="citizen@civic.local" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password <span class="required">*</span></label>
+          <input type="password" id="password" class="form-control" placeholder="••••••••••••" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 8px;">
+          Sign In to Portal
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Don't have a citizen account? <a href="/static/register.html">Register here</a>
+        <div style="margin-top: 12px;">
+          <a href="/static/index.html" style="color: var(--text-muted); font-size: 13px;">← Return to Home</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const quick = localStorage.getItem('quick_demo');
+      if (quick) {
+        fillDemoAccount(quick);
+        localStorage.removeItem('quick_demo');
+      }
+    });
+  </script>
+</body>
+</html>
