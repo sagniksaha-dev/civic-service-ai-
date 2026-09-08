@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicAI - Applications Tracker & Workflow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+  <div class="disclaimer-banner">
+    <span>⚠️</span>
+    <span><strong>Prototype Notice:</strong> Fictional Civic Portal Simulation. Do not enter real identity card numbers.</span>
+  </div>
+
+  <div class="app-shell">
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">🏛️</div>
+        <div class="brand-details">
+          <h2>CivicAI Portal</h2>
+          <p>Public Service Hub</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Main Portal</div>
+        <a href="/static/dashboard.html" class="sidebar-link">
+          <span class="icon">📊</span> Dashboard
+        </a>
+        <a href="/static/services.html" class="sidebar-link">
+          <span class="icon">📚</span> Service Catalogue
+        </a>
+        <a href="/static/applications.html" class="sidebar-link active">
+          <span class="icon">📋</span> Applications Tracker
+        </a>
+        <a href="/static/grievances.html" class="sidebar-link">
+          <span class="icon">📢</span> Grievance Redressal
+        </a>
+        <a href="/static/chat.html" class="sidebar-link">
+          <span class="icon">🤖</span> Grounded AI Chat
+        </a>
+
+        <div class="nav-section-title" data-allowed-roles="admin,department_officer">Administration</div>
+        <a href="/static/departments.html" class="sidebar-link" data-allowed-roles="admin,department_officer">
+          <span class="icon">🏛️</span> Departments
+        </a>
+        <a href="/static/documents.html" class="sidebar-link" data-allowed-roles="admin,department_officer">
+          <span class="icon">📄</span> Knowledge Documents
+        </a>
+
+        <div class="nav-section-title">My Account</div>
+        <a href="/static/profile.html" class="sidebar-link">
+          <span class="icon">👤</span> Citizen Profile
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-badge">
+          <div class="user-avatar" id="sidebarUserAvatar">U</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebarUserName">Loading...</div>
+            <span class="user-role-tag" id="sidebarUserRole">Citizen</span>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="handleLogout()" title="Logout" style="padding: 4px 8px; color: #cbd5e1; border-color: rgba(255,255,255,0.2);">
+            🚪
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-header">
+        <div class="header-left">
+          <button class="mobile-toggle-btn" onclick="document.getElementById('appSidebar').classList.toggle('show')">☰</button>
+          <h1 class="page-header-title">Service Applications Tracker</h1>
+        </div>
+        <div class="header-right">
+          <button class="btn btn-primary btn-sm" onclick="openSubmitAppModal()">
+            <span>➕</span> Submit Application
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="handleLogout()">Sign Out</button>
+        </div>
+      </header>
+
+      <main class="page-container">
+        <!-- Tracker Search Box -->
+        <div class="card" style="padding: 16px 20px; margin-bottom: 20px;">
+          <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+            <div style="display: flex; gap: 12px; flex: 1; flex-wrap: wrap; min-width: 300px;">
+              <input type="text" id="refSearchInput" class="form-control" placeholder="Lookup Tracking Reference (e.g. APP-20260907-XXXX)..." style="max-width: 420px; font-family: var(--font-mono);">
+              <select id="appStatusFilter" class="form-select" style="max-width: 220px;">
+                <option value="">All Statuses</option>
+                <option value="submitted">Submitted</option>
+                <option value="under_review">Under Review</option>
+                <option value="additional_info_required">Additional Info Required</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+            <div id="appCountDisplay" style="font-size: 13px; font-weight: 600; color: var(--text-muted);">
+              Loading...
+            </div>
+          </div>
+        </div>
+
+        <!-- Applications Table Card -->
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 170px;">Reference Number</th>
+                  <th>Service Requested</th>
+                  <th style="width: 130px;">Status</th>
+                  <th style="width: 160px;">Submission Date</th>
+                  <th>Officer Remarks / Notes</th>
+                  <th style="text-align: right; width: 220px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="applicationsTableBody">
+                <tr><td colspan="6" style="text-align: center; padding: 24px;">Loading applications...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Submit Application Modal -->
+  <div class="modal-backdrop" id="submitAppModalBackdrop">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Submit Civic Service Application</h3>
+        <button class="modal-close" onclick="closeSubmitAppModal()">✕</button>
+      </div>
+      <form id="submitAppForm" onsubmit="handleAppSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="appServiceSelect">Target Public Service <span class="required">*</span></label>
+            <select id="appServiceSelect" class="form-select" required onchange="onAppServiceSelected()">
+              <option value="">Choose a Civic Service...</option>
+            </select>
+          </div>
+
+          <!-- Dynamic Service Guide Box -->
+          <div id="appServiceGuideBox" style="display: none; background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; margin-bottom: 18px;">
+            <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">
+              Mandatory Checklist & Statutory SLA (<span id="guideSLA" style="color: var(--primary);"></span>)
+            </div>
+            <ul id="guideReqDocs" style="padding-left: 20px; font-size: 13px; color: var(--text-main);"></ul>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="appApplicantName">Applicant Full Name <span class="required">*</span></label>
+              <input type="text" id="appApplicantName" class="form-control" placeholder="Full Legal Name" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="appHoldingNo">Holding / Assessment / Premise Number</label>
+              <input type="text" id="appHoldingNo" class="form-control" placeholder="e.g. HLD-98214">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="appPremiseDetails">Premise / Connection Address Details</label>
+            <textarea id="appPremiseDetails" class="form-textarea" placeholder="Provide complete physical address and specifics for site inspection..."></textarea>
+          </div>
+
+          <!-- Privacy Guardrail Alert -->
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: var(--radius-sm); padding: 12px; font-size: 12px; color: #1e40af; margin-bottom: 16px;">
+            🛡️ <strong>Privacy Notice:</strong> Do not enter Aadhaar, Social Security, or confidential banking numbers. Only synthetic/fictional municipal identifiers are accepted.
+          </div>
+
+          <div class="form-group" style="display: flex; align-items: flex-start; gap: 8px;">
+            <input type="checkbox" id="appDeclaration" required style="margin-top: 3px;">
+            <label for="appDeclaration" style="font-size: 13px; color: var(--text-main); cursor: pointer;">
+              I declare that the information provided in this civic service application is true and complete according to the department charter.
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeSubmitAppModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="submitAppBtn">Submit Application</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Reference Generated Confirmation Modal -->
+  <div class="modal-backdrop" id="refSuccessModalBackdrop">
+    <div class="modal-dialog">
+      <div class="modal-header" style="background: #ecfdf5; border-bottom: 1px solid #a7f3d0;">
+        <h3 class="modal-title" style="color: #065f46;">🎉 Application Successfully Registered</h3>
+        <button class="modal-close" onclick="closeRefSuccessModal()">✕</button>
+      </div>
+      <div class="modal-body" style="text-align: center; padding: 32px 24px;">
+        <div style="font-size: 48px; margin-bottom: 12px;">📄</div>
+        <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px;">Your Tracking Reference Number</h3>
+        <div style="font-size: 22px; font-family: var(--font-mono); font-weight: 800; color: var(--primary); background: var(--primary-light); padding: 10px 18px; border-radius: var(--radius-md); display: inline-block; margin-bottom: 16px; border: 1px dashed var(--primary);" id="createdRefNoDisplay">
+          APP-20260907-0001
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); max-width: 400px; margin: 0 auto;">
+          Please retain this reference code to track inspection status and officer review updates.
+        </p>
+      </div>
+      <div class="modal-footer" style="justify-content: center;">
+        <button type="button" class="btn btn-primary" onclick="closeRefSuccessModal()">View in Tracker</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Details & Status Timeline Modal -->
+  <div class="modal-backdrop" id="appDetailsModalBackdrop">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <div>
+          <span class="ref-code" id="detailAppRef">APP-REF</span>
+          <h3 class="modal-title" id="detailAppService" style="margin-top: 4px;">Service Name</h3>
+        </div>
+        <button class="modal-close" onclick="closeAppDetailsModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; margin-bottom: 20px;">
+          <div>
+            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Current Status</div>
+            <div id="detailAppStatus" style="margin-top: 4px;"></div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Submission Date</div>
+            <div id="detailAppDate" style="font-weight: 600; font-size: 13px; margin-top: 4px;"></div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Officer Remarks</div>
+            <div id="detailAppRemarks" style="font-size: 13px; margin-top: 4px; color: var(--text-main);"></div>
+          </div>
+        </div>
+
+        <h4 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">Inspection & Workflow Progression Timeline</h4>
+        <div id="appTimelineContainer" style="margin-bottom: 24px;"></div>
+
+        <h4 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">Submitted Application Payload Data</h4>
+        <pre id="detailAppPayload" style="background: #0f172a; color: #f8fafc; padding: 14px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 12px; overflow-x: auto; max-height: 200px;"></pre>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeAppDetailsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Officer Review & Status Transition Modal -->
+  <div class="modal-backdrop" id="officerReviewModalBackdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Officer Review: <span id="reviewAppRefDisplay" class="ref-code">REF</span></h3>
+        <button class="modal-close" onclick="closeOfficerReviewModal()">✕</button>
+      </div>
+      <form id="officerReviewForm" onsubmit="handleOfficerReviewSubmit(event)">
+        <div class="modal-body">
+          <input type="hidden" id="reviewAppId">
+          <div style="margin-bottom: 14px; font-size: 14px; color: var(--text-muted);">
+            Service: <strong id="reviewAppServiceName" style="color: var(--text-main);"></strong>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reviewAppStatusSelect">Workflow Stage / Status <span class="required">*</span></label>
+            <select id="reviewAppStatusSelect" class="form-select" required>
+              <option value="submitted">Submitted</option>
+              <option value="under_review">Under Review (Inspection in progress)</option>
+              <option value="additional_info_required">Additional Info Required</option>
+              <option value="approved">Approved (Sanction Issued)</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reviewOfficerRemarks">Officer Verification Remarks</label>
+            <textarea id="reviewOfficerRemarks" class="form-textarea" placeholder="Document verification notes, field inspection observations, or sanction certificate number..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeOfficerReviewModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveReviewBtn">Update Status</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/applications.js"></script>
+</body>
+</html>

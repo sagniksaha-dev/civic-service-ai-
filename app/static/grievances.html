@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicAI - Grievance Redressal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+  <div class="disclaimer-banner">
+    <span>⚠️</span>
+    <span><strong>Prototype Notice:</strong> Fictional Civic Portal Simulation.</span>
+  </div>
+
+  <div class="app-shell">
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">🏛️</div>
+        <div class="brand-details">
+          <h2>CivicAI Portal</h2>
+          <p>Public Service Hub</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Main Portal</div>
+        <a href="/static/dashboard.html" class="sidebar-link">
+          <span class="icon">📊</span> Dashboard
+        </a>
+        <a href="/static/services.html" class="sidebar-link">
+          <span class="icon">📚</span> Service Catalogue
+        </a>
+        <a href="/static/applications.html" class="sidebar-link">
+          <span class="icon">📋</span> Applications Tracker
+        </a>
+        <a href="/static/grievances.html" class="sidebar-link active">
+          <span class="icon">📢</span> Grievance Redressal
+        </a>
+        <a href="/static/chat.html" class="sidebar-link">
+          <span class="icon">🤖</span> Grounded AI Chat
+        </a>
+
+        <div class="nav-section-title" data-allowed-roles="admin,department_officer">Administration</div>
+        <a href="/static/departments.html" class="sidebar-link" data-allowed-roles="admin,department_officer">
+          <span class="icon">🏛️</span> Departments
+        </a>
+        <a href="/static/documents.html" class="sidebar-link" data-allowed-roles="admin,department_officer">
+          <span class="icon">📄</span> Knowledge Documents
+        </a>
+
+        <div class="nav-section-title">My Account</div>
+        <a href="/static/profile.html" class="sidebar-link">
+          <span class="icon">👤</span> Citizen Profile
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-badge">
+          <div class="user-avatar" id="sidebarUserAvatar">U</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebarUserName">Loading...</div>
+            <span class="user-role-tag" id="sidebarUserRole">Citizen</span>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="handleLogout()" title="Logout" style="padding: 4px 8px; color: #cbd5e1; border-color: rgba(255,255,255,0.2);">
+            🚪
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-header">
+        <div class="header-left">
+          <button class="mobile-toggle-btn" onclick="document.getElementById('appSidebar').classList.toggle('show')">☰</button>
+          <h1 class="page-header-title">Citizen Grievance Redressal</h1>
+        </div>
+        <div class="header-right">
+          <button class="btn btn-primary btn-sm" onclick="openSubmitGrievanceModal()">
+            <span>➕</span> File Grievance
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="handleLogout()">Sign Out</button>
+        </div>
+      </header>
+
+      <main class="page-container">
+        <!-- Filter Header -->
+        <div class="card" style="padding: 16px 20px; margin-bottom: 20px;">
+          <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+            <div style="display: flex; gap: 12px; flex: 1; flex-wrap: wrap; min-width: 300px;">
+              <select id="grievanceStatusFilter" class="form-select" style="max-width: 240px;">
+                <option value="">All Grievance Statuses</option>
+                <option value="submitted">Submitted</option>
+                <option value="in_progress">In Progress (Assigned)</option>
+                <option value="resolved">Resolved</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
+            <div id="grievanceCountDisplay" style="font-size: 13px; font-weight: 600; color: var(--text-muted);">
+              Loading...
+            </div>
+          </div>
+        </div>
+
+        <!-- Grievances Table Card -->
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 120px;">ID</th>
+                  <th>Subject & Inquiry</th>
+                  <th>Department</th>
+                  <th style="width: 130px;">Status</th>
+                  <th style="width: 160px;">Filing Date</th>
+                  <th style="text-align: right; width: 220px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="grievancesTableBody">
+                <tr><td colspan="6" style="text-align: center; padding: 24px;">Loading grievances...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Submit Grievance Modal -->
+  <div class="modal-backdrop" id="submitGrievanceModalBackdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">File Civic Grievance</h3>
+        <button class="modal-close" onclick="closeSubmitGrievanceModal()">✕</button>
+      </div>
+      <form id="submitGrievanceForm" onsubmit="handleGrievanceSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="grievanceDeptSelect">Responsible Department <span class="required">*</span></label>
+            <select id="grievanceDeptSelect" class="form-select" required>
+              <option value="">Select Target Department...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="grievanceSubject">Grievance Subject <span class="required">*</span></label>
+            <input type="text" id="grievanceSubject" class="form-control" placeholder="e.g. Water pipeline pressure drop in Sector 4" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="grievanceDetails">Detailed Explanation <span class="required">*</span></label>
+            <textarea id="grievanceDetails" class="form-textarea" placeholder="Provide full specifics of the civic issue, location coordinates, or affected premises..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeSubmitGrievanceModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="submitGrievanceBtn">Submit Grievance</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Grievance Details & Resolution Modal -->
+  <div class="modal-backdrop" id="grievanceDetailsModalBackdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <span class="ref-code" id="detailGrievanceId">#GRV-ID</span>
+          <h3 class="modal-title" id="detailGrievanceSubject" style="margin-top: 4px;">Subject</h3>
+        </div>
+        <button class="modal-close" onclick="closeGrievanceDetailsModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; margin-bottom: 16px;">
+          <div>
+            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Department</div>
+            <div id="detailGrievanceDept" style="font-weight: 600; font-size: 13px; margin-top: 2px;"></div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Current Status</div>
+            <div id="detailGrievanceStatus" style="margin-top: 2px;"></div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Filing Date</div>
+            <div id="detailGrievanceDate" style="font-weight: 600; font-size: 13px; margin-top: 2px;"></div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 18px;">
+          <h4 style="font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">Citizen Grievance Details</h4>
+          <p id="detailGrievanceDetails" style="font-size: 14px; color: var(--text-main); line-height: 1.6;"></p>
+        </div>
+
+        <div id="detailGrievanceResponse"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeGrievanceDetailsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Officer Resolution Modal -->
+  <div class="modal-backdrop" id="officerRespondModalBackdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Officer Redressal & Resolution</h3>
+        <button class="modal-close" onclick="closeOfficerRespondModal()">✕</button>
+      </div>
+      <form id="officerRespondForm" onsubmit="handleOfficerRespondSubmit(event)">
+        <div class="modal-body">
+          <input type="hidden" id="respondGrievanceId">
+          <div style="margin-bottom: 14px; font-size: 14px; color: var(--text-muted);">
+            Subject: <strong id="respondGrievanceSubjectDisplay" style="color: var(--text-main);"></strong>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="respondGrievanceStatusSelect">Updated Status <span class="required">*</span></label>
+            <select id="respondGrievanceStatusSelect" class="form-select" required>
+              <option value="in_progress">In Progress (Field Inspector Dispatched)</option>
+              <option value="resolved">Resolved (Action Taken & Verified)</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="respondOfficerText">Official Response & Corrective Measures <span class="required">*</span></label>
+            <textarea id="respondOfficerText" class="form-textarea" placeholder="Detail the inspection findings, repairs, or municipal actions completed..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeOfficerRespondModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveRespondBtn">Submit Resolution</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/grievances.js"></script>
+</body>
+</html>
