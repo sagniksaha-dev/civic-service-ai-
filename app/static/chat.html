@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicAI - Grounded AI Civic Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <style>
+    /* Dedicated Chat Page Styles */
+    .chat-layout {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 32px - var(--header-height));
+      overflow: hidden;
+    }
+
+    .chat-sidebar-panel {
+      width: 300px;
+      background: #ffffff;
+      border-right: 1px solid var(--border-color);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    .chat-main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #f8fafc;
+      overflow: hidden;
+    }
+
+    .chat-messages-container {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .chat-input-bar {
+      background: #ffffff;
+      border-top: 1px solid var(--border-color);
+      padding: 16px 24px;
+    }
+
+    .chat-input-box {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      background: #ffffff;
+      border: 1px solid var(--border-color-dark);
+      border-radius: var(--radius-lg);
+      padding: 8px 14px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .chat-textarea {
+      flex: 1;
+      border: none;
+      background: transparent;
+      resize: none;
+      font-family: inherit;
+      font-size: 14px;
+      max-height: 120px;
+      padding: 4px 0;
+      color: var(--text-main);
+    }
+
+    .chat-textarea:focus {
+      outline: none;
+    }
+
+    .chat-message-row {
+      display: flex;
+      width: 100%;
+    }
+
+    .user-row {
+      justify-content: flex-end;
+    }
+
+    .assistant-row {
+      justify-content: flex-start;
+    }
+
+    .chat-bubble {
+      max-width: 780px;
+      padding: 16px 20px;
+      border-radius: var(--radius-lg);
+      font-size: 14px;
+      line-height: 1.6;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .user-bubble {
+      background: var(--primary);
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .assistant-bubble {
+      background: #ffffff;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-bottom-left-radius: 4px;
+    }
+
+    .bubble-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: var(--primary);
+    }
+
+    .chat-sources-box {
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      margin-top: 14px;
+      font-size: 12px;
+    }
+
+    .chat-sources-header {
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      letter-spacing: 0.05em;
+    }
+
+    .chat-source-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 0;
+      color: var(--text-main);
+    }
+
+    .chat-disclaimer-box {
+      background: #eff6ff;
+      border-left: 3px solid var(--primary);
+      border-radius: 4px;
+      padding: 8px 12px;
+      margin-top: 12px;
+      font-size: 11px;
+      color: #1e3a8a;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .typing-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background-color: var(--primary);
+      border-radius: 50%;
+      margin-right: 4px;
+      animation: pulse 1s infinite alternate;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes pulse {
+      from { opacity: 0.3; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1.2); }
+    }
+
+    .status-dot-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      background: #f8fafc;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-color);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .dot-connected { background: var(--success); box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2); }
+    .dot-connecting { background: var(--warning); }
+    .dot-disconnected { background: var(--danger); }
+
+    .quick-prompts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quick-prompt-btn {
+      text-align: left;
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s;
+      line-height: 1.4;
+    }
+
+    .quick-prompt-btn:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .chat-welcome-card {
+      text-align: center;
+      padding: 40px 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .welcome-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .chat-p {
+      margin-bottom: 8px;
+    }
+
+    .chat-ul {
+      padding-left: 20px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="disclaimer-banner">
+    <span>⚠️</span>
+    <span><strong>Prototype Notice:</strong> Fictional Civic Portal Assistant. Answers are grounded in approved sample documents only.</span>
+  </div>
+
+  <div class="app-shell">
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">🏛️</div>
+        <div class="brand-details">
+          <h2>CivicAI Portal</h2>
+          <p>Public Service Hub</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Main Portal</div>
+        <a href="/static/dashboard.html" class="sidebar-link">
+          <span class="icon">📊</span> Dashboard
+        </a>
+        <a href="/static/services.html" class="sidebar-link">
+          <span class="icon">📚</span> Service Catalogue
+        </a>
+        <a href="/static/applications.html" class="sidebar-link">
+          <span class="icon">📋</span> Applications Tracker
+        </a>
+        <a href="/static/grievances.html" class="sidebar-link">
+          <span class="icon">📢</span> Grievance Redressal
+        </a>
+        <a href="/static/chat.html" class="sidebar-link active">
+          <span class="icon">🤖</span> Grounded AI Chat
+        </a>
+
+        <div class="nav-section-title" data-allowed-roles="admin,department_officer">Administration</div>
+        <a href="/static/departments.html" class="sidebar-link" data-allowed-roles="admin,department_officer">
+          <span class="icon">🏛️</span> Departments
+        </a>
+        <a href="/static/documents.html" class="sidebar-link" data-allowed-roles="admin,department_officer">
+          <span class="icon">📄</span> Knowledge Documents
+        </a>
+
+        <div class="nav-section-title">My Account</div>
+        <a href="/static/profile.html" class="sidebar-link">
+          <span class="icon">👤</span> Citizen Profile
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-badge">
+          <div class="user-avatar" id="sidebarUserAvatar">U</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebarUserName">Guest Citizen</div>
+            <span class="user-role-tag" id="sidebarUserRole">Public</span>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="handleLogout()" title="Logout" style="padding: 4px 8px; color: #cbd5e1; border-color: rgba(255,255,255,0.2);">
+            🚪
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-header">
+        <div class="header-left">
+          <button class="mobile-toggle-btn" onclick="document.getElementById('appSidebar').classList.toggle('show')">☰</button>
+          <h1 class="page-header-title">Grounded AI Civic Assistant</h1>
+        </div>
+        <div class="header-right">
+          <div class="status-dot-indicator">
+            <span id="wsStatusDot" class="dot dot-connecting"></span>
+            <span id="wsStatusText">Connecting...</span>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="clearChatHistory()">Clear Chat</button>
+        </div>
+      </header>
+
+      <div class="chat-layout">
+        <!-- Prompts & Guardrails Sidebar -->
+        <div class="chat-sidebar-panel">
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+            ⚡ Frequently Asked Questions
+          </div>
+          <div class="quick-prompts-list">
+            <button class="quick-prompt-btn" data-query="What mandatory documents are required for a new domestic water connection?">
+              💧 Water Connection Documents
+            </button>
+            <button class="quick-prompt-btn" data-query="What is the property tax rebate for early payment and when is the due date?">
+              🏠 Property Tax Due Dates & Rebate
+            </button>
+            <button class="quick-prompt-btn" data-query="What clearances and documents are required to apply for a commercial trade license?">
+              📜 Trade License Clearances
+            </button>
+            <button class="quick-prompt-btn" data-query="What is the statutory procedure for Birth Certificate registration within 21 days?">
+              👶 Birth Certificate Registration
+            </button>
+            <button class="quick-prompt-btn" data-query="Can you guarantee 100% immediate approval of my commercial license without inspection?">
+              🛡️ Test Guardrail / No-Guarantee
+            </button>
+          </div>
+
+          <div style="margin-top: auto; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: var(--radius-md); padding: 14px; font-size: 11px; color: #1e40af; line-height: 1.5;">
+            <strong>🛡️ Grounding Policy:</strong>
+            <p style="margin-top: 4px;">All answers are retrieved strictly from indexed municipal guideline documents. The assistant does not hallucinate statutory approvals.</p>
+          </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="chat-main-area">
+          <div class="chat-messages-container" id="chatMessagesArea">
+            <div class="chat-welcome-card">
+              <div class="welcome-icon">🏛️</div>
+              <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 8px;">Grounded Civic Assistant</h2>
+              <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6;">
+                Ask questions regarding sample civic procedures, mandatory document requirements, and municipal guidelines. Every answer includes verifiable source citations and statutory disclaimers.
+              </p>
+            </div>
+          </div>
+
+          <!-- Chat Input Bar -->
+          <div class="chat-input-bar">
+            <form id="chatInputForm">
+              <div class="chat-input-box">
+                <textarea id="chatInputField" class="chat-textarea" rows="1" placeholder="Ask about civic guidelines, documents, or timelines (Press Enter to send)..." required></textarea>
+                <button type="submit" class="btn btn-primary" id="sendBtn" style="padding: 8px 16px;">
+                  <span>Send</span> ➔
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/chat.js"></script>
+</body>
+</html>

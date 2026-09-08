@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicAI - Approved Knowledge Documents & Vector RAG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+  <div class="disclaimer-banner">
+    <span>⚠️</span>
+    <span><strong>Prototype Notice:</strong> Fictional Civic Portal Simulation. Only approved guidelines are indexed.</span>
+  </div>
+
+  <div class="app-shell">
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">🏛️</div>
+        <div class="brand-details">
+          <h2>CivicAI Portal</h2>
+          <p>Public Service Hub</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Main Portal</div>
+        <a href="/static/dashboard.html" class="sidebar-link">
+          <span class="icon">📊</span> Dashboard
+        </a>
+        <a href="/static/services.html" class="sidebar-link">
+          <span class="icon">📚</span> Service Catalogue
+        </a>
+        <a href="/static/applications.html" class="sidebar-link">
+          <span class="icon">📋</span> Applications Tracker
+        </a>
+        <a href="/static/grievances.html" class="sidebar-link">
+          <span class="icon">📢</span> Grievance Redressal
+        </a>
+        <a href="/static/chat.html" class="sidebar-link">
+          <span class="icon">🤖</span> Grounded AI Chat
+        </a>
+
+        <div class="nav-section-title" data-allowed-roles="admin,department_officer">Administration</div>
+        <a href="/static/departments.html" class="sidebar-link" data-allowed-roles="admin,department_officer">
+          <span class="icon">🏛️</span> Departments
+        </a>
+        <a href="/static/documents.html" class="sidebar-link active" data-allowed-roles="admin,department_officer">
+          <span class="icon">📄</span> Knowledge Documents
+        </a>
+
+        <div class="nav-section-title">My Account</div>
+        <a href="/static/profile.html" class="sidebar-link">
+          <span class="icon">👤</span> Citizen Profile
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-badge">
+          <div class="user-avatar" id="sidebarUserAvatar">U</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebarUserName">Loading...</div>
+            <span class="user-role-tag" id="sidebarUserRole">Citizen</span>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="handleLogout()" title="Logout" style="padding: 4px 8px; color: #cbd5e1; border-color: rgba(255,255,255,0.2);">
+            🚪
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-header">
+        <div class="header-left">
+          <button class="mobile-toggle-btn" onclick="document.getElementById('appSidebar').classList.toggle('show')">☰</button>
+          <h1 class="page-header-title">Approved Knowledge Documents & Vector RAG</h1>
+        </div>
+        <div class="header-right">
+          <button class="btn btn-secondary btn-sm" id="reindexAllBtn" onclick="reindexAllDocuments()" style="display: none;">
+            <span>🔄</span> Re-index All (ChromaDB)
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="handleLogout()">Sign Out</button>
+        </div>
+      </header>
+
+      <main class="page-container">
+        <!-- Upload Document Form Card (Officer/Admin) -->
+        <div class="card" id="uploadDocumentCard" style="display: none;">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title"><span>📤</span> Ingest & Vectorize Approved Service Guideline</h3>
+              <div class="card-subtitle">Upload municipal citizen charters, notices, or SOPs (PDF, DOCX, TXT, MD)</div>
+            </div>
+          </div>
+          <form id="docUploadForm" onsubmit="handleDocumentUpload(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="docFileInput">Select Document File <span class="required">*</span></label>
+                <input type="file" id="docFileInput" class="form-control" accept=".pdf,.docx,.txt,.md" required>
+                <div class="form-hint">Supported formats: PDF, DOCX, Plain Text (.txt), Markdown (.md)</div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="docTitle">Document Title <span class="required">*</span></label>
+                <input type="text" id="docTitle" class="form-control" placeholder="e.g. Water Connection Policy & Citizen Charter" required>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="docDepartmentId">Associated Department</label>
+                <select id="docDepartmentId" class="form-select">
+                  <option value="">Optional: General Civic Guidelines</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="docCategory">Document Category</label>
+                <select id="docCategory" class="form-select">
+                  <option value="guideline">Guideline / Citizen Charter</option>
+                  <option value="form">Application Form Instructions</option>
+                  <option value="faq">FAQ / Procedure Handbook</option>
+                  <option value="notice">Official Municipal Notice</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+              <button type="submit" class="btn btn-primary" id="uploadDocBtn">
+                Upload & Index into Vector Store
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Indexed Documents Table Card -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title"><span>📚</span> Indexed Knowledge Base</h3>
+              <div class="card-subtitle" id="docCountDisplay">Loading documents...</div>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 60px;">ID</th>
+                  <th>Document Title & File</th>
+                  <th>Department</th>
+                  <th style="width: 100px;">Format</th>
+                  <th style="width: 120px;">Chunks</th>
+                  <th style="width: 120px;">Vector Status</th>
+                  <th style="text-align: right; width: 180px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="documentsTableBody">
+                <tr><td colspan="7" style="text-align: center; padding: 24px;">Loading indexed documents...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/documents.js"></script>
+</body>
+</html>
