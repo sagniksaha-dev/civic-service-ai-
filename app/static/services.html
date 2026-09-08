@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicAI - Service Catalogue</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+  <div class="disclaimer-banner">
+    <span>⚠️</span>
+    <span><strong>Prototype Notice:</strong> Fictional Civic Portal Simulation.</span>
+  </div>
+
+  <div class="app-shell">
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">🏛️</div>
+        <div class="brand-details">
+          <h2>CivicAI Portal</h2>
+          <p>Public Service Hub</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Main Portal</div>
+        <a href="/static/dashboard.html" class="sidebar-link">
+          <span class="icon">📊</span> Dashboard
+        </a>
+        <a href="/static/services.html" class="sidebar-link active">
+          <span class="icon">📚</span> Service Catalogue
+        </a>
+        <a href="/static/applications.html" class="sidebar-link">
+          <span class="icon">📋</span> Applications Tracker
+        </a>
+        <a href="/static/grievances.html" class="sidebar-link">
+          <span class="icon">📢</span> Grievance Redressal
+        </a>
+        <a href="/static/chat.html" class="sidebar-link">
+          <span class="icon">🤖</span> Grounded AI Chat
+        </a>
+
+        <div class="nav-section-title" data-allowed-roles="admin,department_officer">Administration</div>
+        <a href="/static/departments.html" class="sidebar-link" data-allowed-roles="admin,department_officer">
+          <span class="icon">🏛️</span> Departments
+        </a>
+        <a href="/static/documents.html" class="sidebar-link" data-allowed-roles="admin,department_officer">
+          <span class="icon">📄</span> Knowledge Documents
+        </a>
+
+        <div class="nav-section-title">My Account</div>
+        <a href="/static/profile.html" class="sidebar-link">
+          <span class="icon">👤</span> Citizen Profile
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-badge">
+          <div class="user-avatar" id="sidebarUserAvatar">U</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebarUserName">Loading...</div>
+            <span class="user-role-tag" id="sidebarUserRole">Citizen</span>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="handleLogout()" title="Logout" style="padding: 4px 8px; color: #cbd5e1; border-color: rgba(255,255,255,0.2);">
+            🚪
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-header">
+        <div class="header-left">
+          <button class="mobile-toggle-btn" onclick="document.getElementById('appSidebar').classList.toggle('show')">☰</button>
+          <h1 class="page-header-title">Service Catalogue & Citizen Guidelines</h1>
+        </div>
+        <div class="header-right">
+          <button class="btn btn-primary btn-sm" id="addServiceBtn" onclick="openCreateServiceModal()" style="display: none;">
+            <span>➕</span> Add New Service
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="handleLogout()">Sign Out</button>
+        </div>
+      </header>
+
+      <main class="page-container">
+        <!-- Search & Filter Header -->
+        <div class="card" style="padding: 16px 20px; margin-bottom: 20px;">
+          <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+            <div style="display: flex; gap: 12px; flex: 1; flex-wrap: wrap; min-width: 300px;">
+              <input type="text" id="serviceSearchInput" class="form-control" placeholder="Search services by keyword, code, or name..." style="max-width: 340px;">
+              <select id="deptFilterSelect" class="form-select" style="max-width: 260px;">
+                <option value="">All Departments</option>
+              </select>
+              <select id="statusFilterSelect" class="form-select" style="max-width: 160px;">
+                <option value="">All Statuses</option>
+                <option value="active">Active Only</option>
+                <option value="inactive">Inactive Only</option>
+              </select>
+            </div>
+            <div id="servicesCountDisplay" style="font-size: 13px; font-weight: 600; color: var(--text-muted);">
+              Loading...
+            </div>
+          </div>
+        </div>
+
+        <!-- Services Cards Grid -->
+        <div id="servicesGridContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px;">
+          <div style="grid-column: 1/-1; text-align: center; padding: 48px;">
+            <span class="loading-spinner"></span> Loading services catalogue...
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Service Details & Requirements Modal -->
+  <div class="modal-backdrop" id="serviceDetailsModalBackdrop">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <div>
+          <span class="ref-code" id="detailServiceCode">CODE</span>
+          <h3 class="modal-title" id="detailServiceName" style="margin-top: 4px;">Service Name</h3>
+        </div>
+        <button class="modal-close" onclick="closeServiceDetailsModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
+          <div>
+            <h4 style="font-size: 14px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">Service Overview</h4>
+            <p id="detailServiceDesc" style="font-size: 14px; color: var(--text-main); line-height: 1.6;"></p>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px;">
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Department:</div>
+            <div style="font-weight: 700; font-size: 13px; margin-bottom: 12px;" id="detailServiceDept"></div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Standard SLA:</div>
+            <div style="font-weight: 700; font-size: 13px; margin-bottom: 12px;" id="detailServiceSLA"></div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Status:</div>
+            <div id="detailServiceStatus"></div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div style="background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 18px;">
+            <h4 style="font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+              <span>📁</span> Mandatory Required Documents (JSONB)
+            </h4>
+            <ul id="detailReqDocuments" style="padding-left: 20px; font-size: 13px; color: var(--text-main);"></ul>
+            <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border-color); font-size: 12px;">
+              <strong>Fee Schedule:</strong> <span id="detailFeeStructure"></span>
+            </div>
+          </div>
+
+          <div style="background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 18px;">
+            <h4 style="font-size: 14px; font-weight: 700; color: var(--secondary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+              <span>✔️</span> Eligibility Criteria
+            </h4>
+            <ul id="detailEligibility" style="padding-left: 20px; font-size: 13px; color: var(--text-main);"></ul>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeServiceDetailsModal()">Close</button>
+        <a href="#" id="applyFromDetailsBtn" class="btn btn-primary">Proceed to Apply ➔</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create / Edit Service Modal -->
+  <div class="modal-backdrop" id="serviceFormModalBackdrop">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="serviceModalTitle">Add New Civic Service</h3>
+        <button class="modal-close" onclick="closeServiceFormModal()">✕</button>
+      </div>
+      <form id="serviceForm" onsubmit="handleServiceFormSubmit(event)">
+        <div class="modal-body">
+          <input type="hidden" id="serviceId">
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="serviceName">Service Name <span class="required">*</span></label>
+              <input type="text" id="serviceName" class="form-control" placeholder="e.g. New Domestic Water Connection" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="serviceCode">Service Code <span class="required">*</span></label>
+              <input type="text" id="serviceCode" class="form-control" placeholder="e.g. UWSD-WTR-01" required style="text-transform: uppercase;">
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="serviceDeptId">Department <span class="required">*</span></label>
+              <select id="serviceDeptId" class="form-select" required>
+                <option value="">Select Department...</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="serviceSLA">SLA Processing Time (Days)</label>
+              <input type="number" id="serviceSLA" class="form-control" value="15" min="1" max="365">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="serviceDesc">Service Description & Scope</label>
+            <textarea id="serviceDesc" class="form-textarea" placeholder="Detailed scope of civic application..."></textarea>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="serviceDocs">Required Documents (One per line)</label>
+              <textarea id="serviceDocs" class="form-textarea" placeholder="Proof of Identity&#10;Proof of Address&#10;Holding Tax Receipt"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="serviceFee">Fee Schedule</label>
+              <input type="text" id="serviceFee" class="form-control" placeholder="e.g. Rs. 500 Application Fee">
+              
+              <label class="form-label" for="serviceMinAge" style="margin-top: 12px;">Minimum Age Requirement</label>
+              <input type="number" id="serviceMinAge" class="form-control" value="18" min="0">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="serviceStatus">Service Availability Status</label>
+            <select id="serviceStatus" class="form-select">
+              <option value="active">Active (Accepting Applications)</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeServiceFormModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveServiceBtn">Save Service</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/services.js"></script>
+</body>
+</html>

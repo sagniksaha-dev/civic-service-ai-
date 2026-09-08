@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicAI - Citizen Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+  <div class="disclaimer-banner">
+    <span>⚠️</span>
+    <span><strong>Prototype Notice:</strong> Fictional Civic Portal Simulation.</span>
+  </div>
+
+  <div class="app-shell">
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">🏛️</div>
+        <div class="brand-details">
+          <h2>CivicAI Portal</h2>
+          <p>Public Service Hub</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Main Portal</div>
+        <a href="/static/dashboard.html" class="sidebar-link">
+          <span class="icon">📊</span> Dashboard
+        </a>
+        <a href="/static/services.html" class="sidebar-link">
+          <span class="icon">📚</span> Service Catalogue
+        </a>
+        <a href="/static/applications.html" class="sidebar-link">
+          <span class="icon">📋</span> Applications Tracker
+        </a>
+        <a href="/static/grievances.html" class="sidebar-link">
+          <span class="icon">📢</span> Grievance Redressal
+        </a>
+        <a href="/static/chat.html" class="sidebar-link">
+          <span class="icon">🤖</span> Grounded AI Chat
+        </a>
+
+        <div class="nav-section-title" data-allowed-roles="admin,department_officer">Administration</div>
+        <a href="/static/departments.html" class="sidebar-link" data-allowed-roles="admin,department_officer">
+          <span class="icon">🏛️</span> Departments
+        </a>
+        <a href="/static/documents.html" class="sidebar-link" data-allowed-roles="admin,department_officer">
+          <span class="icon">📄</span> Knowledge Documents
+        </a>
+
+        <div class="nav-section-title">My Account</div>
+        <a href="/static/profile.html" class="sidebar-link active">
+          <span class="icon">👤</span> Citizen Profile
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-badge">
+          <div class="user-avatar" id="sidebarUserAvatar">U</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebarUserName">Loading...</div>
+            <span class="user-role-tag" id="sidebarUserRole">Citizen</span>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="handleLogout()" title="Logout" style="padding: 4px 8px; color: #cbd5e1; border-color: rgba(255,255,255,0.2);">
+            🚪
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-header">
+        <div class="header-left">
+          <button class="mobile-toggle-btn" onclick="document.getElementById('appSidebar').classList.toggle('show')">☰</button>
+          <h1 class="page-header-title">Citizen Profile & Address Details</h1>
+        </div>
+        <div class="header-right">
+          <button class="btn btn-outline btn-sm" onclick="handleLogout()">Sign Out</button>
+        </div>
+      </header>
+
+      <main class="page-container" style="max-width: 900px;">
+        <!-- User Identity Summary Card -->
+        <div class="card" style="margin-bottom: 24px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: gap; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center;">
+                👤
+              </div>
+              <div>
+                <h2 style="font-size: 18px; font-weight: 800; color: var(--text-main);" id="profileUserName">Loading...</h2>
+                <div style="font-size: 13px; color: var(--text-muted);" id="profileUserEmail">Loading...</div>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div id="profileUserRoleBadge"></div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" id="profileCitizenIdDisplay">#CIT-...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Smart Partial Update Form Card -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title"><span>📝</span> Contact & Address Particulars</h3>
+              <div class="card-subtitle">Smart Partial Updates: Only modified fields will be sent and saved</div>
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted);">
+              Last Updated: <span id="profileUpdatedDisplay">N/A</span>
+            </div>
+          </div>
+
+          <form id="profileForm" onsubmit="handleProfileSubmit(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="profilePhone">Contact Phone Number</label>
+                <input type="tel" id="profilePhone" class="form-control" placeholder="9876543210">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="profileDOB">Date of Birth (YYYY-MM-DD)</label>
+                <input type="text" id="profileDOB" class="form-control" placeholder="1995-08-20">
+              </div>
+            </div>
+
+            <div style="margin: 20px 0 12px; font-size: 14px; font-weight: 700; color: var(--primary); border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+              🏠 Structured Residential Address (JSONB)
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="addrStreet">Street / Building / House Address</label>
+              <input type="text" id="addrStreet" class="form-control" placeholder="e.g. 123 Civil Lines, Ward 4">
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="addrCity">City / Town</label>
+                <input type="text" id="addrCity" class="form-control" placeholder="e.g. Metropolis">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="addrDistrict">District</label>
+                <input type="text" id="addrDistrict" class="form-control" placeholder="e.g. Central">
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="addrState">State</label>
+                <input type="text" id="addrState" class="form-control" placeholder="e.g. State">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="addrPostalCode">Postal PIN Code</label>
+                <input type="text" id="addrPostalCode" class="form-control" placeholder="700001">
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+              <button type="submit" class="btn btn-primary" id="saveProfileBtn">
+                Save Profile Changes (Partial Update)
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/profile.js"></script>
+</body>
+</html>
