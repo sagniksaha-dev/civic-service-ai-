@@ -43,6 +43,14 @@ class CivicGuardrailService:
 
     GREETINGS_PATTERN = r"^(hi|hello|hey|help|namaste|greetings|good morning|good afternoon|good evening|who are you|what can you do|start)\b[!?.]*$"
 
+    ALL_SERVICES_PATTERN = (
+        r"(all\s+services?|every\s+service|list\s+(of\s+)?(all\s+)?services?|available\s+services?|"
+        r"what\s+(are\s+)?(all\s+)?(the\s+)?services?|which\s+services?|service\s+catalogue?|service\s+catalog|"
+        r"services\s+list|say\s+about\s+(all\s+)?services?|tell\s+(me\s+)?(about\s+)?(all\s+)?services?|"
+        r"services?\s+available|services?\s+offered|about\s+all\s+services|sob\s+service|shob\s+service|"
+        r"সকল\s+সার্ভিস|সব\s+সার্ভিস|সকল\s+সেবা|সব\s+সেবা|সকল\s+সার্ভিসগুলো|সকল\s+সেবাগুলো|सभी\s+सेवा|सारी\s+सेवा|all\s+available\s+services)"
+    )
+
     GREETING_HELP_TEXT = (
         "Hello! Welcome to the AI-Powered Civic Service & Grievance Assistant. 🏛️\n\n"
         "I am an automated assistant grounded in approved municipal guidelines and citizen charters.\n\n"
@@ -65,6 +73,12 @@ class CivicGuardrailService:
         """Check if user message is a general greeting or help request."""
         clean = user_text.strip().lower()
         return bool(re.match(cls.GREETINGS_PATTERN, clean))
+
+    @classmethod
+    def is_all_services_query(cls, user_text: str) -> bool:
+        """Check if user message is an inquiry asking for an overview/list of all services."""
+        clean = user_text.strip().lower()
+        return bool(re.search(cls.ALL_SERVICES_PATTERN, clean, re.IGNORECASE))
 
     @classmethod
     def get_greeting_help_text(cls) -> str:

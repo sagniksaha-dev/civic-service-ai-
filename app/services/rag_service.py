@@ -38,6 +38,10 @@ class RAGService:
         if civic_guard.is_greeting(sanitized_q):
             return civic_guard.get_greeting_help_text(), [], disclaimer, True
 
+        # If user inquires about all services / service catalogue
+        if civic_guard.is_all_services_query(sanitized_q):
+            return cls.get_all_services_overview(language=language)
+
         # 1. Retrieve context
         snippets = retriever_service.retrieve_context(
             query=sanitized_q,
@@ -64,6 +68,56 @@ class RAGService:
         sources = retriever_service.format_sources(snippets) if is_grounded else []
 
         return answer, sources, disclaimer, is_grounded
+
+    @classmethod
+    def get_all_services_overview(cls, language: Optional[str] = "en") -> Tuple[str, List[SourceReference], str, bool]:
+        """Dynamically build comprehensive overview of all municipal services from database."""
+        from app.db.session import SessionLocal
+        from app.models.department import Department
+        from app.models.service import Service, ServiceStatus
+        from app.models.knowledge_document import KnowledgeDocument
+
+        disclaimer = civic_guard.get_standard_disclaimer()
+        db = SessionLocal()
+        try:
+            depts = db.query(Department).filter(Department.is_active == True).all()
+            lines = [
+                "Here is the complete catalogue of approved municipal civic services available in the portal across departments:\n"
+            ]
+            for dept in depts:
+                active_services = [s for s in dept.services if s.status == ServiceStatus.ACTIVE]
+                if not active_services:
+                    continue
+                lines.append(f"🏛️ **{dept.name}** ({dept.code})")
+                for s in active_services:
+                    lines.append(f"- **{s.name}** (`{s.code}`)")
+                    if s.description:
+                        lines.append(f"  - *Description*: {s.description}")
+                    lines.append(f"  - *Standard SLA*: {s.processing_time_days} business days")
+                lines.append("")
+
+            lines.append("💡 *To apply for any service, go to the Service Catalogue or Applications Tracker. To inquire about specific requirements or rules, ask with the service name (e.g., 'What documents are required for a water connection?' or 'Trade license guidelines').*")
+
+            answer = "\n".join(lines)
+
+            docs = db.query(KnowledgeDocument).all()
+            sources = [
+                SourceReference(
+                    document_id=d.id,
+                    title=d.title,
+                    file_name=d.file_name,
+                    page_number=1,
+                    chunk_index=0,
+                    similarity_score=1.0,
+                    snippet=f"{d.title} official municipal guideline and statutory procedures."
+                ) for d in docs
+            ]
+            return answer, sources, disclaimer, True
+        except Exception as e:
+            logger.error("Error generating all services overview: %s", e)
+            return civic_guard.get_no_answer_text(), [], disclaimer, False
+        finally:
+            db.close()
 
 
 rag_service = RAGService()
