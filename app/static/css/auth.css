@@ -45,9 +45,18 @@
 }
 
 .auth-logo {
-  font-size: 38px;
-  margin-bottom: 8px;
-  display: inline-block;
+  margin-bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-logo img {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.3);
 }
 
 .auth-title {
