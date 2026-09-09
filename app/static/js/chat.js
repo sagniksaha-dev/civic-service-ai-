@@ -190,8 +190,8 @@ function renderAssistantResponse(data) {
   msgDiv.innerHTML = `
     <div class="chat-bubble assistant-bubble">
       <div class="bubble-header">
-        <img src="/static/assets/civic_ai_logo.jpg" alt="CivicAI" style="width: 22px; height: 22px; border-radius: 6px; object-fit: cover; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-        <strong>CivicAI Assistant</strong>
+        <span class="assistant-avatar">🏛️</span>
+        <strong>Civic AI Assistant</strong>
       </div>
       <div class="bubble-content">
         ${formatMarkdownText(data.answer)}
