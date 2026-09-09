@@ -38,6 +38,10 @@ class RAGService:
         if civic_guard.is_greeting(sanitized_q):
             return civic_guard.get_greeting_help_text(), [], disclaimer, True
 
+        # If user inquires about all departments / department directory
+        if civic_guard.is_all_departments_query(sanitized_q):
+            return cls.get_all_departments_overview(language=language)
+
         # If user inquires about all services / service catalogue
         if civic_guard.is_all_services_query(sanitized_q):
             return cls.get_all_services_overview(language=language)
@@ -68,6 +72,56 @@ class RAGService:
         sources = retriever_service.format_sources(snippets) if is_grounded else []
 
         return answer, sources, disclaimer, is_grounded
+
+    @classmethod
+    def get_all_departments_overview(cls, language: Optional[str] = "en") -> Tuple[str, List[SourceReference], str, bool]:
+        """Dynamically build comprehensive overview of all municipal departments from database."""
+        from app.db.session import SessionLocal
+        from app.models.department import Department
+        from app.models.service import Service, ServiceStatus
+        from app.models.knowledge_document import KnowledgeDocument
+
+        disclaimer = civic_guard.get_standard_disclaimer()
+        db = SessionLocal()
+        try:
+            depts = db.query(Department).filter(Department.is_active == True).all()
+            lines = [
+                f"Here is the complete directory of all {len(depts)} approved municipal departments available in the portal:\n"
+            ]
+            for d in depts:
+                active_services = [s for s in d.services if s.status == ServiceStatus.ACTIVE]
+                lines.append(f"🏛️ **{d.name}** (`{d.code}`)")
+                if d.description:
+                    lines.append(f"  - *Domain Scope*: {d.description}")
+                if active_services:
+                    svc_names = ", ".join(f"{s.name} (`{s.code}`)" for s in active_services)
+                    lines.append(f"  - *Available Services*: {svc_names}")
+                else:
+                    lines.append("  - *Available Services*: Administrative operations & public grievance redressal")
+                lines.append("")
+
+            lines.append("💡 *To apply for any service or file a grievance with a specific department, visit the Service Catalogue or Grievance Redressal sections.*")
+
+            answer = "\n".join(lines)
+
+            docs = db.query(KnowledgeDocument).all()
+            sources = [
+                SourceReference(
+                    document_id=d.id,
+                    title=d.title,
+                    file_name=d.file_name,
+                    page_number=1,
+                    chunk_index=0,
+                    similarity_score=1.0,
+                    snippet=f"{d.title} official department guidelines and statutory charters."
+                ) for d in docs
+            ]
+            return answer, sources, disclaimer, True
+        except Exception as e:
+            logger.error("Error generating all departments overview: %s", e)
+            return civic_guard.get_no_answer_text(), [], disclaimer, False
+        finally:
+            db.close()
 
     @classmethod
     def get_all_services_overview(cls, language: Optional[str] = "en") -> Tuple[str, List[SourceReference], str, bool]:
