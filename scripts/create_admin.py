@@ -99,6 +99,31 @@ def create_initial_users_and_domain() -> None:
                 "name": "Urban Planning & Building Sanction",
                 "code": "URB-PLAN",
                 "description": "Architectural scrutiny, residential/commercial building permits, and structural NOCs."
+            },
+            {
+                "name": "Department of Public Sanitation",
+                "code": "DPS-SAN",
+                "description": "City-wide solid waste management, sewage upkeep, drainage unclogging, and sanitation permits."
+            },
+            {
+                "name": "Fire Safety & Disaster Management Authority",
+                "code": "FIRE-EMERG",
+                "description": "Commercial building Fire Safety NOC clearances, periodic fire hydrant testing, emergency flood relief, and building safety audits."
+            },
+            {
+                "name": "Department of Public Health & Food Safety",
+                "code": "DPH-FOOD",
+                "description": "Issuance of food business hygiene ratings, mosquito eradication drives, municipal immunization centers, and public health inspection clearance certificates."
+            },
+            {
+                "name": "Department of Environment & Urban Greenery",
+                "code": "ENV-PARKS",
+                "description": "Tree trimming permits, public municipal park maintenance, urban afforestation drives, and air quality monitoring initiatives."
+            },
+            {
+                "name": "Municipal Transport & Traffic Management",
+                "code": "MUNI-TRANS",
+                "description": "Commercial parking permits, electric vehicle charging zone allocation, street light maintenance, and road digging NOC permits."
             }
         ]
 
@@ -136,6 +161,24 @@ def create_initial_users_and_domain() -> None:
                     "no_outstanding_arrears": True
                 },
                 "processing_time_days": 15
+            },
+            {
+                "dept_code": "UWSD",
+                "name": "Residential Pipeline Installation",
+                "code": "WAT-INST-01",
+                "description": "Municipal pipeline extension and secondary plumbing line connection for residential houses.",
+                "requirements": {
+                    "required_documents": [
+                        "Holding Tax Receipt",
+                        "Sanctioned Site Blueprint"
+                    ],
+                    "fee_structure": "Rs. 1,200 standard installation charge"
+                },
+                "eligibility_criteria": {
+                    "min_age": 18,
+                    "municipal_line_available": True
+                },
+                "processing_time_days": 10
             },
             {
                 "dept_code": "REV",
@@ -211,6 +254,120 @@ def create_initial_users_and_domain() -> None:
                     "compliant_setbacks": True
                 },
                 "processing_time_days": 30
+            },
+            {
+                "dept_code": "DPS-SAN",
+                "name": "Bulk Commercial Waste Disposal & Sanitation Clearance",
+                "code": "SAN-BULK-01",
+                "description": "Scheduled bulk solid waste collection, hazardous waste clearance, and municipal sanitation clearance certificate.",
+                "requirements": {
+                    "required_documents": [
+                        "Trade License / Property Ownership Proof",
+                        "Waste Segregation Storage Facility Declaration",
+                        "Bio-waste Composting Agreement (if applicable)"
+                    ],
+                    "fee_structure": "Rs. 800 per month or Rs. 5,000 annual subscription"
+                },
+                "eligibility_criteria": {
+                    "min_age": 18,
+                    "waste_generator_tier": "commercial"
+                },
+                "processing_time_days": 7
+            },
+            {
+                "dept_code": "FIRE-EMERG",
+                "name": "Commercial Building Fire Safety NOC Clearance",
+                "code": "FIRE-NOC-01",
+                "description": "Statutory Fire Safety No Objection Certificate (NOC) for commercial establishments, hotels, hospitals, and high-rise structures.",
+                "requirements": {
+                    "required_documents": [
+                        "Approved Architectural Floor Plans with Emergency Fire Exits",
+                        "Firefighting System Installation Proof (Extinguishers, Sprinklers, Hydrant)",
+                        "Structural Fire Resistance & Electrical Load Safety Certificate",
+                        "Commercial Property Lease or Ownership Deed"
+                    ],
+                    "fee_structure": "Rs. 2,500 for premises <2,000 sq ft; Rs. 5,000 for high-rise commercial structures"
+                },
+                "eligibility_criteria": {
+                    "min_age": 18,
+                    "fire_equipment_installed": True
+                },
+                "processing_time_days": 15
+            },
+            {
+                "dept_code": "FIRE-EMERG",
+                "name": "Annual Fire Safety Certificate Renewal & Audit",
+                "code": "FIRE-AUDIT-01",
+                "description": "Mandatory annual inspection, sprinkler system check, and fire safety certificate renewal.",
+                "requirements": {
+                    "required_documents": [
+                        "Previous Fire Safety NOC Copy",
+                        "Annual Extinguisher Refill & Maintenance Receipt",
+                        "Fire Evacuation Drill Log Sheet"
+                    ],
+                    "fee_structure": "Rs. 1,000 Annual Audit & Renewal Fee"
+                },
+                "eligibility_criteria": {
+                    "existing_noc_holder": True
+                },
+                "processing_time_days": 7
+            },
+            {
+                "dept_code": "DPH-FOOD",
+                "name": "Commercial Food Hygiene & Safety Rating Certificate",
+                "code": "FOOD-HYG-01",
+                "description": "Public health inspection and hygiene rating certification for restaurants, cafes, and food vendors.",
+                "requirements": {
+                    "required_documents": [
+                        "FSSAI Registration / License Copy",
+                        "Staff Medical Health Fitness Certificates",
+                        "Quarterly Pest Control Certificate",
+                        "Potable Water Microbial Test Report"
+                    ],
+                    "fee_structure": "Rs. 1,500 for eateries; Rs. 3,500 for large restaurants"
+                },
+                "eligibility_criteria": {
+                    "min_age": 18,
+                    "food_safety_supervisor_certified": True
+                },
+                "processing_time_days": 10
+            },
+            {
+                "dept_code": "ENV-PARKS",
+                "name": "Dangerous Tree Trimming & Arboriculture Clearance",
+                "code": "ENV-TREE-01",
+                "description": "Official municipal permit for trimming overgrown, hazardous, or power-line obstructing trees.",
+                "requirements": {
+                    "required_documents": [
+                        "Proof of Property Ownership / Ward Councillor Recommendation",
+                        "Photographs of Hazardous Tree / Overgrown Branches",
+                        "Site Access Consent Form"
+                    ],
+                    "fee_structure": "Rs. 300 inspection fee"
+                },
+                "eligibility_criteria": {
+                    "min_age": 18,
+                    "hazard_verified": True
+                },
+                "processing_time_days": 5
+            },
+            {
+                "dept_code": "MUNI-TRANS",
+                "name": "Road Digging NOC & Utility Trenching Permit",
+                "code": "TRANS-ROAD-01",
+                "description": "Municipal clearance and traffic coordination permit for underground cable laying, pipeline trenching, and road excavation.",
+                "requirements": {
+                    "required_documents": [
+                        "Approved Utility Alignment Trenching Map",
+                        "Traffic Management & Diversion Plan (Traffic Police Approved)",
+                        "Road Surface Restoration Bank Guarantee"
+                    ],
+                    "fee_structure": "Rs. 3,000 per linear meter refundable restoration deposit"
+                },
+                "eligibility_criteria": {
+                    "authorized_utility_agency_or_contractor": True
+                },
+                "processing_time_days": 14
             }
         ]
 

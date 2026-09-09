@@ -53,7 +53,19 @@ def ingest_knowledge_base_folder() -> None:
             "death": "CIV-REG",
             "building": "URB-PLAN",
             "plan": "URB-PLAN",
-            "grievance": "UWSD"
+            "grievance": "UWSD",
+            "fire": "FIRE-EMERG",
+            "emerg": "FIRE-EMERG",
+            "food": "DPH-FOOD",
+            "hygiene": "DPH-FOOD",
+            "sanitation": "DPS-SAN",
+            "waste": "DPS-SAN",
+            "green": "ENV-PARKS",
+            "park": "ENV-PARKS",
+            "tree": "ENV-PARKS",
+            "transport": "MUNI-TRANS",
+            "traffic": "MUNI-TRANS",
+            "road": "MUNI-TRANS"
         }
 
         for file_path in supported_files:
