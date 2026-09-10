@@ -56,7 +56,6 @@ static_dir = Path(__file__).resolve().parent / "static"
 static_dir.mkdir(parents=True, exist_ok=True)
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
-
 from fastapi.responses import FileResponse, RedirectResponse
 
 @app.get("/", tags=["Root"], include_in_schema=False)
@@ -66,6 +65,10 @@ async def root():
     if index_file.exists():
         return FileResponse(str(index_file))
     return RedirectResponse(url="/docs")
+    
+    
+
+    
 
 
 @app.get("/chat", tags=["Root"], include_in_schema=False)
