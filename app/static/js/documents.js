@@ -98,7 +98,7 @@ function renderDocumentsTable(docs) {
         </td>
         <td>${escapeHtml(deptName)}</td>
         <td><span class="ref-code">${escapeHtml(doc.file_type.toUpperCase())}</span></td>
-        <td><strong>${doc.total_chunks || (doc.chunks ? doc.chunks.length : 0)} chunks</strong></td>
+        <td><strong>${doc.chunk_count ?? doc.total_chunks ?? (doc.chunks ? doc.chunks.length : 0)} chunks</strong></td>
         <td>${renderStatusBadge(doc.status)}</td>
         <td style="text-align: right; white-space: nowrap;">
           ${isOfficerOrAdmin ? `
@@ -139,11 +139,13 @@ async function handleDocumentUpload(e) {
   formData.append('category', category);
 
   try {
-    uploadBtn.disabled = true;
-    uploadBtn.innerHTML = '<span class="loading-spinner"></span> Extracting & Indexing...';
+    if (uploadBtn) {
+      uploadBtn.disabled = true;
+      uploadBtn.innerHTML = '<span class="loading-spinner"></span> Vectorizing & Indexing...';
+    }
 
     const result = await api.uploadFile('/documents/upload', formData);
-    showToast(`Successfully indexed '${result.title}' with ${result.total_chunks || 0} chunks.`, 'success');
+    showToast(`Successfully indexed '${result.title}' with ${result.chunk_count ?? result.total_chunks ?? 0} chunks.`, 'success');
 
     // Reset Form
     document.getElementById('docUploadForm').reset();

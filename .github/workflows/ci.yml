@@ -1,4 +1,4 @@
-name: Civic AI CI Workflow
+ame: Civic AI CI Workflow
 
 on:
   push:

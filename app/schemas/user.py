@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 from app.models.user import UserRole
+from app.schemas.citizen import CitizenResponse
 
 
 class UserBase(BaseModel):
@@ -31,5 +32,6 @@ class UserResponse(UserBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    citizen_profile: Optional[CitizenResponse] = None
 
     model_config = ConfigDict(from_attributes=True)

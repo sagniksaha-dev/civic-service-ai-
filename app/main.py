@@ -47,6 +47,22 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_headers=["*"],
     )
 
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
+
+class NoCacheStaticMiddleware(BaseHTTPMiddleware):
+    """Ensure browser never caches stale static HTML, CSS, or JS files during portal operation."""
+    async def dispatch(self, request: Request, call_next):
+        response: Response = await call_next(request)
+        if request.url.path.startswith("/static") or request.url.path in ["/", "/chat"]:
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        return response
+
+app.add_middleware(NoCacheStaticMiddleware)
+
 # Mount API v1 routes and WebSockets
 app.include_router(api_router, prefix=settings.API_V1_STR)
 app.include_router(ws_router)

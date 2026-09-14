@@ -55,9 +55,11 @@ class Settings(BaseSettings):
         return v
 
     # LLM & AI Provider Configuration
-    LLM_PROVIDER: str = "retrieval_only"  # "retrieval_only", "groq", "openai"
+    LLM_PROVIDER: str = "auto"  # "auto", "gemini", "groq", "openai", "retrieval_only"
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-1.5-flash"
     GROQ_API_KEY: str = ""
-    GROQ_MODEL: str = "llama3-70b-8192"
+    GROQ_MODEL: str = "openai/gpt-oss-120b"
     OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-4o-mini"
 

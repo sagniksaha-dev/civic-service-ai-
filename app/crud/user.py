@@ -97,5 +97,13 @@ class CRUDUser:
         """Check if user has Department Officer role."""
         return user.role == UserRole.DEPARTMENT_OFFICER
 
+    def remove(self, db: Session, user_id: int) -> Optional[User]:
+        """Delete user account by ID."""
+        obj = db.get(User, user_id)
+        if obj:
+            db.delete(obj)
+            db.commit()
+        return obj
+
 
 user_crud = CRUDUser()

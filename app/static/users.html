@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicAI - Registered Users Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <style>
+    .role-badge-admin {
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .role-badge-officer {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .role-badge-citizen {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .user-table-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .user-info-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-name-text {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+    .user-email-text {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    .profile-field-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 13px;
+    }
+    .profile-field-label {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .profile-field-val {
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <!-- Prototype Notice Banner -->
+  <div class="disclaimer-banner">
+    <span>⚠️</span>
+    <span><strong>Prototype Notice:</strong> Fictional Civic Portal Simulation. All registered accounts and profiles are simulated.</span>
+  </div>
+
+  <div class="app-shell">
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">🏛️</div>
+        <div class="brand-details">
+          <h2>CivicAI Portal</h2>
+          <p>Public Service Hub</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Main Portal</div>
+        <a href="/static/dashboard.html" class="sidebar-link">
+          <span class="icon">📊</span> Dashboard
+        </a>
+        <a href="/static/services.html" class="sidebar-link">
+          <span class="icon">📚</span> Service Catalogue
+        </a>
+        <a href="/static/applications.html" class="sidebar-link">
+          <span class="icon">📋</span> Applications Tracker
+        </a>
+        <a href="/static/grievances.html" class="sidebar-link">
+          <span class="icon">📢</span> Grievance Redressal
+        </a>
+        <a href="/static/chat.html" class="sidebar-link">
+          <span class="icon">🤖</span> Grounded AI Chat
+        </a>
+
+        <div class="nav-section-title" data-allowed-roles="admin,department_officer">Administration</div>
+        <a href="/static/users.html" class="sidebar-link active" data-allowed-roles="admin">
+          <span class="icon">👥</span> Registered Users
+        </a>
+        <a href="/static/departments.html" class="sidebar-link" data-allowed-roles="admin,department_officer">
+          <span class="icon">🏛️</span> Departments
+        </a>
+        <a href="/static/documents.html" class="sidebar-link" data-allowed-roles="admin,department_officer">
+          <span class="icon">📄</span> Knowledge Documents
+        </a>
+
+        <div class="nav-section-title">My Account</div>
+        <a href="/static/profile.html" class="sidebar-link">
+          <span class="icon">👤</span> Citizen Profile
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-badge">
+          <div class="user-avatar" id="sidebarUserAvatar">U</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebarUserName">Loading...</div>
+            <span class="user-role-tag" id="sidebarUserRole">Citizen</span>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="handleLogout()" title="Logout" style="padding: 4px 8px; color: #cbd5e1; border-color: rgba(255,255,255,0.2);">
+            🚪
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="app-main">
+      <header class="app-header">
+        <div class="header-left">
+          <button class="mobile-toggle-btn" onclick="document.getElementById('appSidebar').classList.toggle('show')">☰</button>
+          <h1 class="page-header-title">Registered Users & Citizen Management</h1>
+        </div>
+        <div class="header-right">
+          <button class="btn btn-primary btn-sm" onclick="openCreateUserModal()">
+            <span>➕</span> Register New User
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="handleLogout()">Sign Out</button>
+        </div>
+      </header>
+
+      <main class="page-container">
+        <!-- Stats Row -->
+        <div class="stats-grid" id="userStatsGrid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 24px;">
+          <div class="stat-card" style="padding: 16px;">
+            <div class="stat-icon-wrapper stat-icon-blue">👥</div>
+            <div class="stat-details">
+              <div class="stat-label">Total Users</div>
+              <div class="stat-value" id="statTotalUsers">0</div>
+            </div>
+          </div>
+          <div class="stat-card" style="padding: 16px;">
+            <div class="stat-icon-wrapper stat-icon-green">👨‍💼</div>
+            <div class="stat-details">
+              <div class="stat-label">Citizens</div>
+              <div class="stat-value" id="statTotalCitizens">0</div>
+            </div>
+          </div>
+          <div class="stat-card" style="padding: 16px;">
+            <div class="stat-icon-wrapper stat-icon-amber">👮‍♂️</div>
+            <div class="stat-details">
+              <div class="stat-label">Dept Officers</div>
+              <div class="stat-value" id="statTotalOfficers">0</div>
+            </div>
+          </div>
+          <div class="stat-card" style="padding: 16px;">
+            <div class="stat-icon-wrapper stat-icon-purple">👑</div>
+            <div class="stat-details">
+              <div class="stat-label">Administrators</div>
+              <div class="stat-value" id="statTotalAdmins">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Users Table Card -->
+        <div class="card">
+          <div class="card-header" style="flex-wrap: wrap; gap: 16px;">
+            <div>
+              <h3 class="card-title"><span>👥</span> System Users Directory</h3>
+              <div class="card-subtitle" id="userCountDisplay">Loading registered accounts...</div>
+            </div>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <!-- Search Bar -->
+              <input type="text" id="userSearchInput" class="form-control" placeholder="Search name, email, or phone..." style="min-width: 220px; max-width: 300px;">
+              <!-- Role Filter -->
+              <select id="userRoleFilter" class="form-control" style="width: auto; min-width: 140px;">
+                <option value="all">All Roles</option>
+                <option value="citizen">Citizens Only</option>
+                <option value="department_officer">Officers Only</option>
+                <option value="admin">Admins Only</option>
+              </select>
+              <!-- Status Filter -->
+              <select id="userStatusFilter" class="form-control" style="width: auto; min-width: 130px;">
+                <option value="all">All Status</option>
+                <option value="active">Active Accounts</option>
+                <option value="inactive">Inactive Accounts</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">ID</th>
+                  <th>User Details</th>
+                  <th style="width: 150px;">Role</th>
+                  <th>Citizen Contact & City</th>
+                  <th style="width: 100px;">Status</th>
+                  <th style="width: 130px;">Joined</th>
+                  <th style="text-align: right; width: 180px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
+                <tr><td colspan="7" style="text-align: center; padding: 32px;"><span class="loading-spinner"></span> Loading registered users...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Create / Register User Modal -->
+  <div class="modal-backdrop" id="createUserModalBackdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Register New User Account</h3>
+        <button class="modal-close" onclick="closeCreateUserModal()">✕</button>
+      </div>
+      <form id="createUserForm" onsubmit="handleCreateUserSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="createUserName">Full Name <span class="required">*</span></label>
+            <input type="text" id="createUserName" class="form-control" placeholder="e.g. Rahul Sen" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="createUserEmail">Email Address <span class="required">*</span></label>
+            <input type="email" id="createUserEmail" class="form-control" placeholder="user@civic.local" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="createUserPassword">Password <span class="required">*</span></label>
+            <input type="password" id="createUserPassword" class="form-control" placeholder="Minimum 6 characters" minlength="6" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="createUserRole">Assigned Role <span class="required">*</span></label>
+            <select id="createUserRole" class="form-control" required onchange="toggleCitizenFieldsOnCreate()">
+              <option value="citizen">Citizen (Standard Portal User)</option>
+              <option value="department_officer">Department Officer (Reviews Applications/Grievances)</option>
+              <option value="admin">System Administrator (Full System Access)</option>
+            </select>
+          </div>
+
+          <div id="createCitizenFields">
+            <div class="form-group">
+              <label class="form-label" for="createUserPhone">Phone Number</label>
+              <input type="tel" id="createUserPhone" class="form-control" placeholder="e.g. 9876543210">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="createUserCity">City / Municipality</label>
+              <input type="text" id="createUserCity" class="form-control" placeholder="e.g. Metropolis">
+            </div>
+          </div>
+
+          <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="createUserActive" checked>
+            <label for="createUserActive" style="font-size: 13px; font-weight: 500; cursor: pointer;">Account is Active and Enabled</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeCreateUserModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="createUserSubmitBtn">Create User</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit User & Role Modal -->
+  <div class="modal-backdrop" id="editUserModalBackdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit User Profile & Permissions</h3>
+        <button class="modal-close" onclick="closeEditUserModal()">✕</button>
+      </div>
+      <form id="editUserForm" onsubmit="handleEditUserSubmit(event)">
+        <div class="modal-body">
+          <input type="hidden" id="editUserId">
+
+          <div class="form-group">
+            <label class="form-label" for="editUserName">Full Name <span class="required">*</span></label>
+            <input type="text" id="editUserName" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="editUserEmail">Email Address <span class="required">*</span></label>
+            <input type="email" id="editUserEmail" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="editUserRole">Assigned Role <span class="required">*</span></label>
+            <select id="editUserRole" class="form-control" required>
+              <option value="citizen">Citizen (Standard Portal User)</option>
+              <option value="department_officer">Department Officer (Reviews Applications/Grievances)</option>
+              <option value="admin">System Administrator (Full System Access)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="editUserPassword">New Password (Leave blank to keep unchanged)</label>
+            <input type="password" id="editUserPassword" class="form-control" placeholder="Optional new password (min 6 chars)" minlength="6">
+          </div>
+
+          <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="editUserActive">
+            <label for="editUserActive" style="font-size: 13px; font-weight: 500; cursor: pointer;">Account Active Status</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeEditUserModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="editUserSubmitBtn">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- View Citizen Profile Details Modal -->
+  <div class="modal-backdrop" id="viewProfileModalBackdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Citizen Profile Details</h3>
+        <button class="modal-close" onclick="closeViewProfileModal()">✕</button>
+      </div>
+      <div class="modal-body" id="viewProfileModalBody">
+        <div style="text-align: center; padding: 24px;"><span class="loading-spinner"></span> Loading profile...</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="closeViewProfileModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js?v=4"></script>
+  <script src="/static/js/auth.js?v=4"></script>
+  <script src="/static/js/users.js?v=4"></script>
+</body>
+</html>

@@ -175,7 +175,7 @@ function renderAssistantResponse(data) {
               <span class="source-icon">📄</span>
               <div style="flex: 1;">
                 <strong>${escapeHtml(s.document_title || s.title || 'Civic Document')}</strong>
-                <span style="font-size: 11px; color: #64748b; margin-left: 6px;">(Chunk #${s.chunk_id || s.id || '1'})</span>
+                <span style="font-size: 11px; color: #64748b; margin-left: 6px;">(Page ${s.page_number || 1}, Chunk #${s.chunk_index !== undefined ? s.chunk_index + 1 : (s.chunk_id || '1')})</span>
               </div>
             </div>
           `).join('')}
@@ -292,38 +292,99 @@ function clearChatHistory() {
   }
 }
 
-// Basic markdown format helper (bold, bullet points, numbered lists)
+// Enhanced markdown format helper (bold, italic, headers, tables, code blocks, lists)
 function formatMarkdownText(text) {
   if (!text) return '';
   let formatted = escapeHtml(text);
 
-  // Bold **text**
-  formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Inline Code `code`
+  formatted = formatted.replace(/`([^`]+)`/g, '<code class="chat-code">$1</code>');
 
-  // Convert linebreaks & bullets
+  // Bold **text**
+  formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+  // Italic *text*
+  formatted = formatted.replace(/(^|[^\*])\*([^\*]+)\*([^\*]|$)/g, '$1<em>$2</em>$3');
+
+  // Headers ###, ##, #
+  formatted = formatted.replace(/^###\s*(.*)$/gm, '<h4 class="chat-h4">$1</h4>');
+  formatted = formatted.replace(/^##\s*(.*)$/gm, '<h3 class="chat-h3">$1</h3>');
+  formatted = formatted.replace(/^#\s*(.*)$/gm, '<h2 class="chat-h2">$1</h2>');
+
+  // Handle tables and list structures
   const lines = formatted.split('\n');
   let inList = false;
+  let inTable = false;
+  let tableRows = [];
   let result = [];
 
-  for (let line of lines) {
-    const trimmed = line.trim();
+  for (let i = 0; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
+
+    // Table line: | ... |
+    if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+      if (inList) { result.push('</ul>'); inList = false; }
+      // Skip separator row: |---|---|
+      if (/^\|(\s*[-:]+\s*\|)+$/.test(trimmed)) {
+        continue;
+      }
+      if (!inTable) {
+        inTable = true;
+        tableRows = [];
+      }
+      const cells = trimmed.split('|').slice(1, -1).map(c => c.trim());
+      tableRows.push(cells);
+      continue;
+    } else if (inTable) {
+      result.push('<table class="chat-table">');
+      if (tableRows.length > 0) {
+        result.push('<thead><tr>' + tableRows[0].map(c => `<th>${c}</th>`).join('') + '</tr></thead>');
+        result.push('<tbody>');
+        for (let r = 1; r < tableRows.length; r++) {
+          result.push('<tr>' + tableRows[r].map(c => `<td>${c}</td>`).join('') + '</tr>');
+        }
+        result.push('</tbody>');
+      }
+      result.push('</table>');
+      inTable = false;
+      tableRows = [];
+    }
+
     if (trimmed.startsWith('* ') || trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
       if (!inList) {
         result.push('<ul class="chat-ul">');
         inList = true;
       }
       result.push(`<li>${trimmed.substring(2)}</li>`);
+    } else if (/^\d+\.\s+/.test(trimmed)) {
+      if (!inList) {
+        result.push('<ol class="chat-ol">');
+        inList = true;
+      }
+      result.push(`<li>${trimmed.replace(/^\d+\.\s+/, '')}</li>`);
     } else {
       if (inList) {
         result.push('</ul>');
         inList = false;
       }
-      if (trimmed.length > 0) {
+      if (trimmed.startsWith('<h2') || trimmed.startsWith('<h3') || trimmed.startsWith('<h4')) {
+        result.push(trimmed);
+      } else if (trimmed.length > 0) {
         result.push(`<p class="chat-p">${trimmed}</p>`);
       }
     }
   }
 
   if (inList) result.push('</ul>');
+  if (inTable && tableRows.length > 0) {
+    result.push('<table class="chat-table">');
+    result.push('<thead><tr>' + tableRows[0].map(c => `<th>${c}</th>`).join('') + '</tr></thead>');
+    result.push('<tbody>');
+    for (let r = 1; r < tableRows.length; r++) {
+      result.push('<tr>' + tableRows[r].map(c => `<td>${c}</td>`).join('') + '</tr>');
+    }
+    result.push('</tbody></table>');
+  }
+
   return result.join('');
 }

@@ -218,7 +218,7 @@ async function renderAdminDashboard() {
         <div class="stat-meta">Indexed in Vector Store ➔</div>
       </div>
     </a>
-    <a href="/static/departments.html" class="stat-card" title="System Directory">
+    <a href="/static/users.html" class="stat-card" title="Registered Users & Citizen Management">
       <div class="stat-icon-wrapper stat-icon-amber">👥</div>
       <div class="stat-details">
         <div class="stat-label">Registered Users</div>
@@ -231,6 +231,10 @@ async function renderAdminDashboard() {
   // Quick Actions for Admin
   document.getElementById('quickActionsContainer').innerHTML = `
     <div class="quick-actions-grid">
+      <a href="/static/users.html" class="quick-action-card">
+        <span class="quick-action-icon">👥</span>
+        <span class="quick-action-title">Manage Users</span>
+      </a>
       <a href="/static/departments.html" class="quick-action-card">
         <span class="quick-action-icon">🏛️</span>
         <span class="quick-action-title">Manage Departments</span>

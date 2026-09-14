@@ -109,3 +109,32 @@ def update_user(
         user_in.is_active = None
 
     return user_crud.update(db, db_obj=user, obj_in=user_in)
+
+
+@router.delete(
+    "/{user_id}",
+    summary="Delete User (Admin Only)",
+    description="Permanently remove a user account. Admins cannot delete their own active account."
+)
+def delete_user(
+    user_id: int,
+    db: Session = Depends(deps.get_db),
+    current_admin: User = Depends(deps.require_admin)
+) -> Any:
+    """Delete user account (Admin only)."""
+    if current_admin.id == user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Administrators cannot delete their own active account."
+        )
+
+    user = user_crud.get(db, user_id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found."
+        )
+
+    user_crud.remove(db, user_id=user_id)
+    return {"message": "User deleted successfully", "id": user_id}
+

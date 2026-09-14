@@ -38,6 +38,10 @@ class RAGService:
         if civic_guard.is_greeting(sanitized_q):
             return civic_guard.get_greeting_help_text(), [], disclaimer, True
 
+        # If user asks for guaranteed approval / promise (Anti-Guarantee Safety Guardrail)
+        if civic_guard.is_guarantee_query(sanitized_q):
+            return civic_guard.get_anti_guarantee_text(language=language), [], disclaimer, True
+
         # If user inquires about all departments / department directory
         if civic_guard.is_all_departments_query(sanitized_q):
             return cls.get_all_departments_overview(language=language)
@@ -45,6 +49,38 @@ class RAGService:
         # If user inquires about all services / service catalogue
         if civic_guard.is_all_services_query(sanitized_q):
             return cls.get_all_services_overview(language=language)
+
+        # If user asks how to apply for services
+        if civic_guard.is_how_to_apply_query(sanitized_q):
+            return cls.get_how_to_apply_overview(language=language)
+
+        # If user asks how to file a grievance
+        if civic_guard.is_how_to_grievance_query(sanitized_q):
+            return cls.get_how_to_grievance_overview(language=language)
+
+        # If user asks how to track applications
+        if civic_guard.is_how_to_track_query(sanitized_q):
+            return cls.get_how_to_track_overview(language=language)
+
+        # If user asks how to find a service or the best department
+        if civic_guard.is_find_service_or_dept_query(sanitized_q):
+            return cls.get_find_service_or_dept_overview(language=language)
+
+        # If user reports locality drain / drainage issues
+        if civic_guard.is_drainage_problem_query(sanitized_q):
+            return cls.get_drainage_problem_overview(language=language)
+
+        # If user reports garbage accumulation / street waste
+        if civic_guard.is_garbage_problem_query(sanitized_q):
+            return cls.get_garbage_problem_overview(language=language)
+
+        # If user reports broken roads / streetlights
+        if civic_guard.is_road_light_problem_query(sanitized_q):
+            return cls.get_road_light_problem_overview(language=language)
+
+        # If user reports water leakage / supply issues
+        if civic_guard.is_water_problem_query(sanitized_q):
+            return cls.get_water_problem_overview(language=language)
 
         # 1. Retrieve context
         snippets = retriever_service.retrieve_context(
@@ -170,6 +206,238 @@ class RAGService:
         except Exception as e:
             logger.error("Error generating all services overview: %s", e)
             return civic_guard.get_no_answer_text(), [], disclaimer, False
+        finally:
+            db.close()
+
+    @classmethod
+    def get_how_to_apply_overview(cls, language: Optional[str] = "en") -> Tuple[str, List[SourceReference], str, bool]:
+        """Provide structured step-by-step guidance on applying for civic services."""
+        from app.db.session import SessionLocal
+        from app.models.knowledge_document import KnowledgeDocument
+
+        disclaimer = civic_guard.get_standard_disclaimer()
+        answer = civic_guard.get_how_to_apply_text(language=language)
+        db = SessionLocal()
+        try:
+            docs = db.query(KnowledgeDocument).all()
+            sources = [
+                SourceReference(
+                    document_id=d.id,
+                    title=d.title,
+                    file_name=d.file_name,
+                    page_number=1,
+                    chunk_index=0,
+                    similarity_score=1.0,
+                    snippet=f"{d.title} statutory application procedure and mandatory submission guidelines."
+                ) for d in docs[:3]
+            ]
+            return answer, sources, disclaimer, True
+        except Exception as e:
+            logger.error("Error loading documents for apply overview: %s", e)
+            return answer, [], disclaimer, True
+        finally:
+            db.close()
+
+    @classmethod
+    def get_how_to_grievance_overview(cls, language: Optional[str] = "en") -> Tuple[str, List[SourceReference], str, bool]:
+        """Provide structured step-by-step guidance on lodging civic grievances."""
+        from app.db.session import SessionLocal
+        from app.models.knowledge_document import KnowledgeDocument
+
+        disclaimer = civic_guard.get_standard_disclaimer()
+        answer = civic_guard.get_how_to_grievance_text(language=language)
+        db = SessionLocal()
+        try:
+            docs = db.query(KnowledgeDocument).all()
+            sources = [
+                SourceReference(
+                    document_id=d.id,
+                    title=d.title,
+                    file_name=d.file_name,
+                    page_number=1,
+                    chunk_index=0,
+                    similarity_score=1.0,
+                    snippet=f"{d.title} grievance escalation and resolution charter."
+                ) for d in docs[:3]
+            ]
+            return answer, sources, disclaimer, True
+        except Exception as e:
+            logger.error("Error loading documents for grievance overview: %s", e)
+            return answer, [], disclaimer, True
+        finally:
+            db.close()
+
+    @classmethod
+    def get_how_to_track_overview(cls, language: Optional[str] = "en") -> Tuple[str, List[SourceReference], str, bool]:
+        """Provide structured step-by-step guidance on application status tracking."""
+        from app.db.session import SessionLocal
+        from app.models.knowledge_document import KnowledgeDocument
+
+        disclaimer = civic_guard.get_standard_disclaimer()
+        answer = civic_guard.get_how_to_track_text(language=language)
+        db = SessionLocal()
+        try:
+            docs = db.query(KnowledgeDocument).all()
+            sources = [
+                SourceReference(
+                    document_id=d.id,
+                    title=d.title,
+                    file_name=d.file_name,
+                    page_number=1,
+                    chunk_index=0,
+                    similarity_score=1.0,
+                    snippet=f"{d.title} statutory tracking reference codes and verification stages."
+                ) for d in docs[:3]
+            ]
+            return answer, sources, disclaimer, True
+        except Exception as e:
+            logger.error("Error loading documents for tracking overview: %s", e)
+            return answer, [], disclaimer, True
+        finally:
+            db.close()
+
+    @classmethod
+    def get_find_service_or_dept_overview(cls, language: Optional[str] = "en") -> Tuple[str, List[SourceReference], str, bool]:
+        """Provide structured guidance on finding services and mapping to the best department."""
+        from app.db.session import SessionLocal
+        from app.models.knowledge_document import KnowledgeDocument
+
+        disclaimer = civic_guard.get_standard_disclaimer()
+        answer = civic_guard.get_find_service_or_dept_text(language=language)
+        db = SessionLocal()
+        try:
+            docs = db.query(KnowledgeDocument).all()
+            sources = [
+                SourceReference(
+                    document_id=d.id,
+                    title=d.title,
+                    file_name=d.file_name,
+                    page_number=1,
+                    chunk_index=0,
+                    similarity_score=1.0,
+                    snippet=f"{d.title} department charters and municipal service catalogue mapping."
+                ) for d in docs[:4]
+            ]
+            return answer, sources, disclaimer, True
+        except Exception as e:
+            logger.error("Error loading documents for find service overview: %s", e)
+            return answer, [], disclaimer, True
+        finally:
+            db.close()
+
+    @classmethod
+    def get_drainage_problem_overview(cls, language: Optional[str] = "en") -> Tuple[str, List[SourceReference], str, bool]:
+        """Provide structured guidance for locality drain and sewer issues."""
+        from app.db.session import SessionLocal
+        from app.models.knowledge_document import KnowledgeDocument
+
+        disclaimer = civic_guard.get_standard_disclaimer()
+        answer = civic_guard.get_drainage_problem_text(language=language)
+        db = SessionLocal()
+        try:
+            docs = db.query(KnowledgeDocument).all()
+            sources = [
+                SourceReference(
+                    document_id=d.id,
+                    title=d.title,
+                    file_name=d.file_name,
+                    page_number=1,
+                    chunk_index=0,
+                    similarity_score=1.0,
+                    snippet=f"{d.title} sanitation SOP and public grievance resolution charter."
+                ) for d in docs[:3]
+            ]
+            return answer, sources, disclaimer, True
+        except Exception as e:
+            logger.error("Error loading documents for drainage overview: %s", e)
+            return answer, [], disclaimer, True
+        finally:
+            db.close()
+
+    @classmethod
+    def get_garbage_problem_overview(cls, language: Optional[str] = "en") -> Tuple[str, List[SourceReference], str, bool]:
+        """Provide structured guidance for garbage and street cleanliness issues."""
+        from app.db.session import SessionLocal
+        from app.models.knowledge_document import KnowledgeDocument
+
+        disclaimer = civic_guard.get_standard_disclaimer()
+        answer = civic_guard.get_garbage_problem_text(language=language)
+        db = SessionLocal()
+        try:
+            docs = db.query(KnowledgeDocument).all()
+            sources = [
+                SourceReference(
+                    document_id=d.id,
+                    title=d.title,
+                    file_name=d.file_name,
+                    page_number=1,
+                    chunk_index=0,
+                    similarity_score=1.0,
+                    snippet=f"{d.title} solid waste management charter."
+                ) for d in docs[:2]
+            ]
+            return answer, sources, disclaimer, True
+        except Exception as e:
+            logger.error("Error loading documents for garbage overview: %s", e)
+            return answer, [], disclaimer, True
+        finally:
+            db.close()
+
+    @classmethod
+    def get_road_light_problem_overview(cls, language: Optional[str] = "en") -> Tuple[str, List[SourceReference], str, bool]:
+        """Provide structured guidance for broken roads and streetlights."""
+        from app.db.session import SessionLocal
+        from app.models.knowledge_document import KnowledgeDocument
+
+        disclaimer = civic_guard.get_standard_disclaimer()
+        answer = civic_guard.get_road_light_problem_text(language=language)
+        db = SessionLocal()
+        try:
+            docs = db.query(KnowledgeDocument).all()
+            sources = [
+                SourceReference(
+                    document_id=d.id,
+                    title=d.title,
+                    file_name=d.file_name,
+                    page_number=1,
+                    chunk_index=0,
+                    similarity_score=1.0,
+                    snippet=f"{d.title} public works and road maintenance charter."
+                ) for d in docs[:2]
+            ]
+            return answer, sources, disclaimer, True
+        except Exception as e:
+            logger.error("Error loading documents for road/light overview: %s", e)
+            return answer, [], disclaimer, True
+        finally:
+            db.close()
+
+    @classmethod
+    def get_water_problem_overview(cls, language: Optional[str] = "en") -> Tuple[str, List[SourceReference], str, bool]:
+        """Provide structured guidance for water supply problems and leaks."""
+        from app.db.session import SessionLocal
+        from app.models.knowledge_document import KnowledgeDocument
+
+        disclaimer = civic_guard.get_standard_disclaimer()
+        answer = civic_guard.get_water_problem_text(language=language)
+        db = SessionLocal()
+        try:
+            docs = db.query(KnowledgeDocument).all()
+            sources = [
+                SourceReference(
+                    document_id=d.id,
+                    title=d.title,
+                    file_name=d.file_name,
+                    page_number=1,
+                    chunk_index=0,
+                    similarity_score=1.0,
+                    snippet=f"{d.title} urban water supply regulations."
+                ) for d in docs[:2]
+            ]
+            return answer, sources, disclaimer, True
+        except Exception as e:
+            logger.error("Error loading documents for water overview: %s", e)
+            return answer, [], disclaimer, True
         finally:
             db.close()
 

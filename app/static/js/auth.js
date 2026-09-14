@@ -6,6 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initAuthUI();
 });
 
+// Also run immediately if DOM is already ready
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  initAuthUI();
+}
+
 function initAuthUI() {
   const user = api.getUser();
   const token = api.getToken();
@@ -17,22 +22,34 @@ function initAuthUI() {
     return;
   }
 
+  const role = user ? (user.role || 'citizen') : 'citizen';
+
   // Populate sidebar/header user chips if present
-  if (user) {
-    const nameEl = document.getElementById('sidebarUserName');
-    if (nameEl) nameEl.innerText = user.name || 'Civic User';
+  const nameEl = document.getElementById('sidebarUserName');
+  if (nameEl) nameEl.innerText = user ? (user.name || 'Civic User') : 'Guest Citizen';
 
-    const roleEl = document.getElementById('sidebarUserRole');
-    if (roleEl) roleEl.innerText = user.role ? user.role.replace(/_/g, ' ') : 'Citizen';
+  const roleEl = document.getElementById('sidebarUserRole');
+  if (roleEl) roleEl.innerText = user && user.role ? user.role.replace(/_/g, ' ') : 'Citizen';
 
-    const avatarEl = document.getElementById('sidebarUserAvatar');
-    if (avatarEl) {
-      avatarEl.innerText = (user.name || 'U').charAt(0).toUpperCase();
-    }
-
-    // Role-based navigation visibility
-    applyRoleNavigation(user.role);
+  const avatarEl = document.getElementById('sidebarUserAvatar');
+  if (avatarEl) {
+    avatarEl.innerText = (user && user.name ? user.name : 'U').charAt(0).toUpperCase();
   }
+
+  // Update My Account sidebar label based on role
+  const profileLink = document.querySelector('a[href*="profile.html"]');
+  if (profileLink) {
+    if (role === 'admin') {
+      profileLink.innerHTML = '<span class="icon">👑</span> Administrator Profile';
+    } else if (role === 'department_officer') {
+      profileLink.innerHTML = '<span class="icon">👮‍♂️</span> Officer Profile';
+    } else {
+      profileLink.innerHTML = '<span class="icon">👤</span> Citizen Profile';
+    }
+  }
+
+  // Role-based navigation visibility
+  applyRoleNavigation(role);
 }
 
 // Guard Route by Role
@@ -59,10 +76,11 @@ function requireAuth(allowedRoles = []) {
 
 // Dynamically display sidebar links based on role
 function applyRoleNavigation(role) {
-  // Show / hide navigation items based on data-role attribute
+  const currentRole = String(role || 'citizen').toLowerCase().trim();
   document.querySelectorAll('[data-allowed-roles]').forEach(el => {
-    const roles = el.getAttribute('data-allowed-roles').split(',').map(r => r.trim());
-    if (roles.includes(role) || roles.includes('*')) {
+    const raw = el.getAttribute('data-allowed-roles') || '';
+    const roles = raw.split(',').map(r => r.trim().toLowerCase());
+    if (roles.includes(currentRole) || roles.includes('*')) {
       el.style.display = '';
     } else {
       el.style.display = 'none';
